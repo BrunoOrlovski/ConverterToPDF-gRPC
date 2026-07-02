@@ -1,0 +1,14 @@
+==================================================================
+              DEMONSTRACAO DO TRABALHO IV - FRAMEWORK gRPC
+==================================================================
+Este arquivo de texto (.txt) sera convertido para o formato PDF.
+O processo de conversao utiliza:
+1. Um cliente Java que lê o arquivo local em blocos de 4KB e envia
+   para o servidor atraves de gRPC Client-side Streaming.
+2. Um servidor Java que recebe esses blocos, junta em memoria,
+   e utiliza a biblioteca OpenPDF para gerar o documento PDF.
+3. O servidor entao envia o PDF resultante em blocos de 4KB de volta
+   ao cliente usando gRPC Server-side Streaming.
+4. Toda a comunicacao ocorre de forma assincrona e otimizada.
+==================================================================
+FIM DO ARQUIVO DE TESTE.

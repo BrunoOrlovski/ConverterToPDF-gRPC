@@ -1,0 +1,22 @@
+# Build files
+target/
+dependency-reduced-pom.xml
+
+# Local portable maven installation
+.maven/
+
+# Temp test files
+test_input.pdf
+test_image.pdf
+test_image.png
+
+# IDE configurations
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+Thumbs.db
+Desktop.ini

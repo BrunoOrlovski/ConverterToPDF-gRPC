@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.proto.filetransfer";
+option java_outer_classname = "FileTransferProto";
+
+package filetransfer;
+
+// Serviço gRPC para conversão de arquivos para PDF
+service FileService {
+  // Transmite o arquivo de entrada (TXT, PNG, JPG) e recebe o PDF correspondente de volta
+  rpc ConvertToPdf(stream ConvertRequest) returns (stream ConvertResponse);
+}
+
+message ConvertRequest {
+  oneof data {
+    Metadata metadata = 1; // Enviado na primeira mensagem (nome e extensão do arquivo)
+    bytes chunk = 2;       // Conteúdo do arquivo em partes (chunks) de bytes
+  }
+}
+
+message Metadata {
+  string name = 1; // Nome original do arquivo com extensão (ex: "relatorio.txt" ou "foto.png")
+}
+
+message ConvertResponse {
+  bytes chunk = 1; // Conteúdo do PDF resultante enviado em partes (chunks) de bytes
+}
