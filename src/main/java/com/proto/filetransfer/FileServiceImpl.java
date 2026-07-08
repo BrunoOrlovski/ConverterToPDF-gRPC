@@ -55,11 +55,9 @@ public class FileServiceImpl extends FileServiceGrpc.FileServiceImplBase {
                 System.out.println("[Servidor] Arquivo \"" + fileName + "\" totalmente recebido (" + inputBytes.length + " bytes). Convertendo...");
 
                 try {
-                    // Executa a conversão para PDF usando OpenPDF
                     byte[] pdfBytes = PdfConverter.convertToPdf(fileName, inputBytes);
                     System.out.println("[Servidor] Conversão concluída! Tamanho do PDF: " + pdfBytes.length + " bytes. Enviando ao cliente...");
 
-                    // Transmite o PDF de volta em chunks de 4KB
                     int chunkSize = 4096;
                     int offset = 0;
                     while (offset < pdfBytes.length) {

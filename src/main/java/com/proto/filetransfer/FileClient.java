@@ -48,7 +48,6 @@ public class FileClient {
                     System.out.print("[Cliente] Digite o caminho completo do arquivo para conversão: ");
                     String filePath = scanner.nextLine().trim();
                     
-                    // Remover aspas do caminho se arrastado para o console no Windows
                     if (filePath.startsWith("\"") && filePath.endsWith("\"")) {
                         filePath = filePath.substring(1, filePath.length() - 1);
                     }
@@ -65,7 +64,6 @@ public class FileClient {
                 }
             }
         } finally {
-            // Fechamento amigável do canal gRPC
             channel.shutdown();
             try {
                 channel.awaitTermination(5, TimeUnit.SECONDS);
@@ -77,7 +75,7 @@ public class FileClient {
     }
 
     private static void convertFileToPdf(ManagedChannel channel, final File file) {
-        // Obter o diretório de destino (o mesmo do arquivo original) e nome do arquivo de saída
+
         String originalName = file.getName();
         String baseName = originalName.substring(0, originalName.lastIndexOf('.'));
         final File outputFile = new File(file.getParentFile(), baseName + ".pdf");
@@ -85,11 +83,13 @@ public class FileClient {
         System.out.println("[Cliente] Iniciando upload de: " + originalName);
         System.out.println("[Cliente] O resultado será salvo em: " + outputFile.getAbsolutePath());
 
-        // Precisamos usar o Stub assíncrono para streams bidirecionais
+        // Stub assíncrono para streams bidirecionais
         FileServiceGrpc.FileServiceStub stub = FileServiceGrpc.newStub(channel);
         
         final CountDownLatch latch = new CountDownLatch(1);
         final ByteArrayOutputStream pdfBytesStream = new ByteArrayOutputStream();
+
+
         
         // Define o observer que receberá os dados do PDF de volta do servidor
         StreamObserver<ConvertResponse> responseObserver = new StreamObserver<ConvertResponse>() {
@@ -112,7 +112,6 @@ public class FileClient {
 
             @Override
             public void onCompleted() {
-                // Transmissão concluída pelo servidor, grava o PDF final
                 byte[] pdfBytes = pdfBytesStream.toByteArray();
                 System.out.println("\n[Cliente] PDF recebido completamente (" + pdfBytes.length + " bytes). Salvando arquivo...");
                 
@@ -131,13 +130,11 @@ public class FileClient {
         StreamObserver<ConvertRequest> requestObserver = stub.convertToPdf(responseObserver);
 
         try {
-            // 1. Enviar os metadados (nome do arquivo original)
             ConvertRequest metadataRequest = ConvertRequest.newBuilder()
                     .setMetadata(Metadata.newBuilder().setName(originalName).build())
                     .build();
             requestObserver.onNext(metadataRequest);
 
-            // 2. Enviar o arquivo em pedaços (chunks) de 4KB
             byte[] buffer = new byte[4096];
             try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
                 int bytesRead;
@@ -151,17 +148,15 @@ public class FileClient {
                     requestObserver.onNext(chunkRequest);
                     totalSent += bytesRead;
                     
-                    // Exibir porcentagem de envio
                     int progress = (int) ((totalSent * 100) / fileLength);
                     System.out.print("\r[Cliente] Enviando arquivo... " + progress + "%");
                 }
                 System.out.println("\n[Cliente] Envio finalizado. Aguardando servidor converter...");
             }
 
-            // Informa ao servidor que o cliente terminou de enviar
             requestObserver.onCompleted();
 
-            // Aguarda a resposta do servidor (no máximo 5 minutos)
+            // Aguarda a resposta do servidor 
             if (!latch.await(5, TimeUnit.MINUTES)) {
                 System.err.println("[Cliente] Tempo limite excedido aguardando resposta do servidor.");
             }
